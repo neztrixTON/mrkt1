@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Моё мини-приложение</title>
+  <script>
+    window.Telegram.WebApp.ready();
+    const initData = window.Telegram.WebApp.initData;
+    const initDataUnsafe = window.Telegram.WebApp.initDataUnsafe;
+
+    async function authenticate() {
+      try {
+        const response = await fetch('http://mrkt1-production-076a.up.railway.app:8080/auth', {
+          method: 'POST',
+          headers: {
+            'Authorization': `tma ${initData}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        const result = await response.json();
+        if (result.token) {
+          alert('Авторизация прошла успешно!');
+        } else {
+          alert('Ошибка авторизации: ' + result.error);
+        }
+      } catch (error) {
+        alert('Ошибка при запросе: ' + error.message);
+      }
+    }
+
+    authenticate();
+  </script>
+</head>
+<body>
+  <h1>Добро пожаловать в моё мини-приложение!</h1>
+  <p>Здесь будет отображаться информация о пользователе.</p>
+</body>
+</html>
