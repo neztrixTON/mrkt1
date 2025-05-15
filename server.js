@@ -1,51 +1,62 @@
 import express from 'express';
 import fetch from 'node-fetch';
+import bodyParser from 'body-parser';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static('public'));
-app.use(express.json());
+// Middleware для парсинга JSON
+app.use(bodyParser.json());
 
+// Обработка POST-запроса на /auth
 app.post('/auth', async (req, res) => {
-  const { initData } = req.body;
-
-  if (!initData) {
-    return res.status(400).json({ error: 'Отсутствует initData' });
-  }
-
-  const payload = {
-    data: initData,
-    photo: null,
-    appId: null,
-  };
-
   try {
+    const requestData = req.body;
+
+    // Отправка запроса к внешнему API
     const response = await fetch('https://api.tgmrkt.io/api/v1/auth', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': '*/*',
-        'Origin': 'https://cdn.tgmrkt.io',
-        'Referer': 'https://cdn.tgmrkt.io/',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+        // Добавьте другие необходимые заголовки здесь
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(requestData),
     });
 
-    const data = await response.json();
-
-    if (!data.token) {
-      return res.status(502).json({ error: 'Невалидный ответ от API', raw: data });
+    // Проверка статуса ответа
+    if (!response.ok) {
+      console.error(`Ошибка: ${response.status} ${response.statusText}`);
+      return res.status(response.status).json({ error: 'Ошибка при обращении к внешнему API' });
     }
 
-    res.json(data);
-  } catch (err) {
-    console.error('Ошибка запроса к tgmrkt.io:', err);
-    res.status(500).json({ error: 'Ошибка при запросе', details: err.message });
+    // Получение текста ответа
+    const text = await response.text();
+
+    // Проверка на пустой ответ
+    if (!text) {
+      console.error('Пустой ответ от внешнего API');
+      return res.status(502).json({ error: 'Пустой ответ от внешнего API' });
+    }
+
+    // Попытка разбора ответа как JSON
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch (parseError) {
+      console.error('Ошибка при разборе JSON:', parseError);
+      return res.status(500).json({ error: 'Некорректный JSON в ответе от внешнего API' });
+    }
+
+    // Отправка успешного ответа клиенту
+    res.json(json);
+  } catch (error) {
+    console.error('Ошибка при обработке запроса:', error);
+    res.status(500).json({ error: 'Внутренняя ошибка сервера' });
   }
 });
 
+// Запуск сервера
 app.listen(PORT, () => {
-  console.log(`Сервер запущен на https://mrkt1-production.up.railway.app:${PORT}`);
+  console.log(`Сервер запущен на порту ${PORT}`);
 });
