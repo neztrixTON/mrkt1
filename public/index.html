@@ -11,7 +11,7 @@
 
     async function authenticate() {
       try {
-        const response = await fetch('http://mrkt1-production-076a.up.railway.app:8080/auth', {
+        const response = await fetch('https://mrkt1-production.up.railway.app:3000/auth', {
           method: 'POST',
           headers: {
             'Authorization': `tma ${initData}`,
