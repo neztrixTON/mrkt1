@@ -5,6 +5,9 @@ import bodyParser from 'body-parser';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.static('public'));
+app.use(express.json());
+
 // Middleware для парсинга JSON
 app.use(bodyParser.json());
 
