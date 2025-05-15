@@ -2,54 +2,32 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Telegram Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-    }
-  </style>
 </head>
 <body>
-  <h2>Добро пожаловать в Mini App</h2>
-  <button id="authBtn">Авторизоваться</button>
+  <button id="authButton">Авторизоваться</button>
 
   <script>
     const tg = window.Telegram.WebApp;
-    tg.ready();
 
-    document.getElementById('authBtn').addEventListener('click', async () => {
-      const initData = tg.initData || '';
-      if (!initData) {
-        alert('Ошибка: приложение не запущено в Telegram');
-        return;
-      }
-
+    document.getElementById('authButton').addEventListener('click', async () => {
       try {
+        const initData = tg.initData;
         const response = await fetch('/auth', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `tma ${initData}`
-          }
+          },
+          body: JSON.stringify({ initData }),
         });
 
         const result = await response.json();
         console.log('Ответ от /auth:', result);
-
-        if (result.token) {
-          alert(`Успешная авторизация! Токен: ${result.token}`);
-        } else {
-          alert(`Ошибка: ${result.error || 'Неизвестная ошибка'}`);
-        }
-      } catch (err) {
-        console.error('Ошибка при запросе:', err);
-        alert('Ошибка при авторизации');
+        // Здесь можно обработать полученный токен
+      } catch (error) {
+        console.error('Ошибка при отправке запроса:', error);
       }
     });
   </script>
