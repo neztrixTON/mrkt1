@@ -51,5 +51,5 @@ app.post('/auth', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://mrkt1-production-076a.up.railway.app:${PORT}`);
+  console.log(`Server running at https://mrkt1-production.up.railway.app:${PORT}`);
 });
